@@ -17,5 +17,4 @@ class CandleUtilsTest extends BaseTest {
         assertEquals(expected, max);
     }
 
-
 }

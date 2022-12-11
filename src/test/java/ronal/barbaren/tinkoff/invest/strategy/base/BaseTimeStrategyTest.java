@@ -65,7 +65,7 @@ class BaseTimeStrategyTest {
 
     @Test
     void doEveryMonth() {
-        Instant now = Instant.now();
+        Instant now = Instant.parse("2007-12-03T10:15:30.00Z");
         List<Instant> days = IntStream.range(0, 50)
                 .mapToObj(i -> now.minus(i, ChronoUnit.DAYS))
                 .sorted()

@@ -15,4 +15,17 @@ public class OperationUtils {
                 .orElse(null);
     }
 
+    public static Operation getLastBuy(Set<Operation> operations) {
+        return operations.stream()
+                .filter(Operation::isBuy)
+                .max(Comparator.comparing(Operation::getDate))
+                .orElse(null);
+    }
+
+    public static Operation getLastSell(Set<Operation> operations) {
+        return operations.stream()
+                .filter(Operation::isSell)
+                .max(Comparator.comparing(Operation::getDate))
+                .orElse(null);
+    }
 }

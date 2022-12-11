@@ -5,6 +5,7 @@ import org.apache.commons.collections4.CollectionUtils;
 import ronal.barbaren.tinkoff.invest.wrapper.dto.candle.Candle;
 
 import javax.annotation.Nullable;
+import java.math.BigDecimal;
 import java.util.Arrays;
 import java.util.Comparator;
 import java.util.List;
@@ -69,5 +70,14 @@ public class CandleUtils {
                 .filter(a -> Objects.nonNull(a.getMinPrice()))
                 .min(Comparator.comparing(Candle::getMinPrice))
                 .orElse(null);
+    }
+
+    @Nullable
+    public static BigDecimal getSubtractMaxMinPrice(Candle candle) {
+        if (Objects.isNull(candle))
+            return null;
+        BigDecimal maxPrice = candle.getMaxPrice();
+        BigDecimal minPrice = candle.getMinPrice();
+        return maxPrice.subtract(minPrice);
     }
 }
