@@ -1,14 +1,12 @@
-package ronal.barbaren.tinkoff.invest.strategy.base;
+package ronal.barbaren.tinkoff.invest.strategy;
 
-import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
-import ronal.barbaren.tinkoff.invest.strategy.Environment;
-import ronal.barbaren.tinkoff.invest.strategy.Strategy;
+import ronal.barbaren.tinkoff.invest.strategy.env.Environment;
 import ronal.barbaren.tinkoff.invest.wrapper.api.Api;
 
+@Getter
 @RequiredArgsConstructor
-@Getter(AccessLevel.PROTECTED)
 public abstract class BaseStrategy implements Strategy {
     private final Api api;
     private final Environment env;

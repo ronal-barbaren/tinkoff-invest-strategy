@@ -1,7 +1,7 @@
-package ronal.barbaren.tinkoff.invest.strategy.base;
+package ronal.barbaren.tinkoff.invest.strategy;
 
 import org.apache.commons.collections4.CollectionUtils;
-import ronal.barbaren.tinkoff.invest.strategy.Environment;
+import ronal.barbaren.tinkoff.invest.strategy.env.Environment;
 import ronal.barbaren.tinkoff.invest.strategy.utils.CandleUtils;
 import ronal.barbaren.tinkoff.invest.strategy.utils.OperationUtils;
 import ronal.barbaren.tinkoff.invest.wrapper.api.Api;
@@ -36,15 +36,19 @@ public abstract class BaseCachedStrategy extends BaseTimeStrategy {
     private BigDecimal lastPrice;
     private BigDecimal minPriceIncrement;
     private Set<Order> notExecutedOrders;
-
     private List<Candle> oneDayCandlesByLastTradeYear;
     private List<Candle> oneMinuteCandlesByLastCalendarDay;
+    private List<Candle> oneMinuteCandlesByLastHour;
+    private List<Candle> oneMinuteCandlesByLastFiveMinute;
+    private List<Candle> oneMinuteCandlesByLastTenMinute;
+    private List<Candle> oneMinuteCandlesByLastTwentyMinute;
     private Candle oneDayCandleByLastTradeDay;
     private Candle oneDayCandleByCurrentDay;
     private Candle oneMinuteCandleByMaxPriceAndLastTradeDay;
+    private Candle oneMinuteCandleByPrevMinute;
 
     @Override
-    protected void doEveryMinute() {
+    public void doEveryMinute() {
         position = null;
         lastExecutedOperation = null;
         executedOperationsByLastTradeDay = null;
@@ -58,49 +62,58 @@ public abstract class BaseCachedStrategy extends BaseTimeStrategy {
         executedOperationsByCurrentDay = null;
         lastExecutedSellOperation = null;
         lastExecutedBuyOperation = null;
+        oneMinuteCandlesByLastFiveMinute = null;
+        oneMinuteCandlesByLastTenMinute = null;
+        oneMinuteCandlesByLastTwentyMinute = null;
+        oneMinuteCandleByPrevMinute = null;
     }
 
     @Override
-    protected void doEveryDay() {
+    public void doEveryFiveMinute() {
+        oneMinuteCandlesByLastHour = null;
+    }
+
+    @Override
+    public void doEveryDay() {
         minPriceIncrement = null;
         oneDayCandlesByLastTradeYear = null;
         oneDayCandleByLastTradeDay = null;
     }
 
-    protected Set<Order> getNotExecutedOrders() {
+    public Set<Order> getNotExecutedOrders() {
         if (Objects.isNull(notExecutedOrders))
             notExecutedOrders = getApi().getNotExecutedOrders();
         return notExecutedOrders;
     }
 
     @Nonnull
-    protected BigDecimal getMinPriceIncrement() {
+    public BigDecimal getMinPriceIncrement() {
         if (Objects.isNull(minPriceIncrement))
             minPriceIncrement = getApi().getMinPriceIncrement();
         return minPriceIncrement;
     }
 
-    protected BigDecimal getPriceByLastDate() {
+    public BigDecimal getLastPrice() {
         if (Objects.isNull(lastPrice))
             lastPrice = getApi().getLastPrice();
         return lastPrice;
     }
 
     @Nonnull
-    protected Set<Amount> getAmounts() {
+    public Set<Amount> getAmounts() {
         if (Objects.isNull(amounts))
             amounts = getApi().getAmounts();
         return amounts;
     }
 
     @Nonnull
-    protected Position getPosition() {
+    public Position getPosition() {
         if (Objects.isNull(position))
             position = getApi().getPosition();
         return position;
     }
 
-    protected Set<Operation> getExecutedOperationsByCurrentDay() {
+    public Set<Operation> getExecutedOperationsByCurrentDay() {
         if (Objects.nonNull(executedOperationsByCurrentDay))
             return executedOperationsByCurrentDay;
         Candle cCandle = getOneDayCandleByCurrentDay();
@@ -113,7 +126,7 @@ public abstract class BaseCachedStrategy extends BaseTimeStrategy {
     }
 
     @Nonnull
-    protected Set<Operation> getExecutedOperationsByLastTradeDay() {
+    public Set<Operation> getExecutedOperationsByLastTradeDay() {
         if (Objects.nonNull(executedOperationsByLastTradeDay))
             return executedOperationsByLastTradeDay;
         Instant lastTradeDate = getLastTradeDate();
@@ -124,7 +137,7 @@ public abstract class BaseCachedStrategy extends BaseTimeStrategy {
     }
 
     @Nonnull
-    protected Set<Operation> getExecutedOperationsByLastTradeWeek() {
+    public Set<Operation> getExecutedOperationsByLastTradeWeek() {
         if (Objects.nonNull(executedOperationsByLastTradeWeek))
             return executedOperationsByLastTradeWeek;
         Instant lastTradeDate = getLastTradeDate();
@@ -137,7 +150,7 @@ public abstract class BaseCachedStrategy extends BaseTimeStrategy {
     }
 
     @Nonnull
-    protected Set<Operation> getExecutedOperationsByLastTradeMonth() {
+    public Set<Operation> getExecutedOperationsByLastTradeMonth() {
         if (Objects.nonNull(executedOperationsByLastTradeMonth))
             return executedOperationsByLastTradeMonth;
         Instant lastTradeDate = getLastTradeDate();
@@ -150,7 +163,7 @@ public abstract class BaseCachedStrategy extends BaseTimeStrategy {
     }
 
     @Nullable
-    protected Operation getLastExecutedBuyOperation() {
+    public Operation getLastExecutedBuyOperation() {
         if (Objects.nonNull(lastExecutedBuyOperation))
             return lastExecutedBuyOperation;
         Set<Operation> cOperations = getExecutedOperationsByCurrentDay();
@@ -167,7 +180,7 @@ public abstract class BaseCachedStrategy extends BaseTimeStrategy {
     }
 
     @Nullable
-    protected Operation getLastExecutedSellOperation() {
+    public Operation getLastExecutedSellOperation() {
         if (Objects.nonNull(lastExecutedSellOperation))
             return lastExecutedSellOperation;
         Set<Operation> cOperations = getExecutedOperationsByCurrentDay();
@@ -184,7 +197,7 @@ public abstract class BaseCachedStrategy extends BaseTimeStrategy {
     }
 
     @Nullable
-    protected Operation getLastExecutedOperation() {
+    public Operation getLastExecutedOperation() {
         if (Objects.nonNull(lastExecutedOperation))
             return lastExecutedOperation;
         Set<Operation> cOperations = getExecutedOperationsByCurrentDay();
@@ -201,7 +214,7 @@ public abstract class BaseCachedStrategy extends BaseTimeStrategy {
     }
 
     @Nonnull
-    protected List<Candle> getOneDayCandlesByLastTradeYear() {
+    public List<Candle> getOneDayCandlesByLastTradeYear() {
         if (Objects.nonNull(oneDayCandlesByLastTradeYear))
             return oneDayCandlesByLastTradeYear;
         Instant now = getEnv().now();
@@ -211,7 +224,7 @@ public abstract class BaseCachedStrategy extends BaseTimeStrategy {
     }
 
     @Nullable
-    protected Candle getOneDayCandleByLastTradeDay() {
+    public Candle getOneDayCandleByLastTradeDay() {
         if (Objects.nonNull(oneDayCandleByLastTradeDay))
             return oneDayCandleByLastTradeDay;
         List<Candle> year1DayCandles = getOneDayCandlesByLastTradeYear();
@@ -220,7 +233,7 @@ public abstract class BaseCachedStrategy extends BaseTimeStrategy {
     }
 
     @Nullable
-    protected Candle getOneDayCandleByCurrentDay() {
+    public Candle getOneDayCandleByCurrentDay() {
         if (Objects.nonNull(oneDayCandleByCurrentDay))
             return oneDayCandleByCurrentDay;
         Instant to = truncateDay(plusDay(now()));
@@ -232,18 +245,73 @@ public abstract class BaseCachedStrategy extends BaseTimeStrategy {
         return oneDayCandleByCurrentDay;
     }
 
+    @Nullable
+    public Candle getOneMinuteCandleByPrevMinute() {
+        if (Objects.nonNull(oneMinuteCandleByPrevMinute))
+            return oneMinuteCandleByPrevMinute;
+        Instant to = truncateMinute(now());
+        Instant from = minusMinute(to);
+        List<Candle> oneCandle = getApi().getCandles1Min(from, to);
+        if (CollectionUtils.isEmpty(oneCandle))
+            return null;
+        if (oneCandle.size() > 1)
+            throw new IllegalStateException("prev minute candle must be one");
+        oneMinuteCandleByPrevMinute = oneCandle.get(0);
+        return oneMinuteCandleByPrevMinute;
+    }
+
     @Nonnull
-    protected List<Candle> getOneMinuteCandlesByLastCalendarDay() {
+    public List<Candle> getOneMinuteCandlesByLastCalendarDay() {
         if (Objects.nonNull(oneMinuteCandlesByLastCalendarDay))
             return oneMinuteCandlesByLastCalendarDay;
-        Instant now = getEnv().now();
-        Instant to = minusDay(now);
-        oneMinuteCandlesByLastCalendarDay = getApi().getCandles1Min(now, to);
+        Instant to = getEnv().now();
+        Instant from = minusDay(to);
+        oneMinuteCandlesByLastCalendarDay = getApi().getCandles1Min(from, to);
         return oneMinuteCandlesByLastCalendarDay;
     }
 
+    @Nonnull
+    public List<Candle> getOneMinuteCandlesByLastHour() {
+        if (Objects.nonNull(oneMinuteCandlesByLastHour))
+            return oneMinuteCandlesByLastHour;
+        Instant to = getEnv().now();
+        Instant from = minusHour(to, 1);
+        oneMinuteCandlesByLastHour = getApi().getCandles1Min(from, to);
+        return oneMinuteCandlesByLastHour;
+    }
+
+    @Nonnull
+    public List<Candle> getOneMinuteCandlesByLastFiveMinute() {
+        if (Objects.nonNull(oneMinuteCandlesByLastFiveMinute))
+            return oneMinuteCandlesByLastFiveMinute;
+        Instant to = getEnv().now();
+        Instant from = minusMinute(to, 5);
+        oneMinuteCandlesByLastFiveMinute = getApi().getCandles1Min(from, to);
+        return oneMinuteCandlesByLastFiveMinute;
+    }
+
+    @Nonnull
+    public List<Candle> getOneMinuteCandlesByLastTenMinute() {
+        if (Objects.nonNull(oneMinuteCandlesByLastTenMinute))
+            return oneMinuteCandlesByLastTenMinute;
+        Instant to = getEnv().now();
+        Instant from = minusMinute(to, 10);
+        oneMinuteCandlesByLastTenMinute = getApi().getCandles1Min(from, to);
+        return oneMinuteCandlesByLastTenMinute;
+    }
+
+    @Nonnull
+    public List<Candle> getOneMinuteCandlesByLastTwentyMinute() {
+        if (Objects.nonNull(oneMinuteCandlesByLastTwentyMinute))
+            return oneMinuteCandlesByLastTwentyMinute;
+        Instant to = getEnv().now();
+        Instant from = minusMinute(to, 20);
+        oneMinuteCandlesByLastTwentyMinute = getApi().getCandles1Min(from, to);
+        return oneMinuteCandlesByLastTwentyMinute;
+    }
+
     @Nullable
-    protected Candle getOneMinuteCandleByMaxPriceAndLastTradeDay() {
+    public Candle getOneMinuteCandleByMaxPriceAndLastTradeDay() {
         if (Objects.nonNull(oneMinuteCandleByMaxPriceAndLastTradeDay))
             return oneMinuteCandleByMaxPriceAndLastTradeDay;
         List<Candle> candles = getOneMinuteCandlesByLastCalendarDay();
@@ -262,14 +330,14 @@ public abstract class BaseCachedStrategy extends BaseTimeStrategy {
     }
 
     @Nullable
-    protected Instant getLastTradeDate() {
+    public Instant getLastTradeDate() {
         Candle lCandle = getOneDayCandleByLastTradeDay();
         if (Objects.nonNull(lCandle))
             return truncateDay(lCandle.getDate());
         return null;
     }
 
-    protected BaseCachedStrategy(Api api, Environment env) {
+    public BaseCachedStrategy(Api api, Environment env) {
         super(api, env);
     }
 }

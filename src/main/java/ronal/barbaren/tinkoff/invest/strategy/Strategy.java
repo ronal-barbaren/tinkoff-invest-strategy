@@ -1,5 +1,10 @@
 package ronal.barbaren.tinkoff.invest.strategy;
 
-public interface Strategy extends Runnable {
-    void run();
+import ronal.barbaren.tinkoff.invest.strategy.analyze.StrategyAnalyzeResult;
+
+import javax.annotation.Nullable;
+
+public interface Strategy {
+    @Nullable
+    StrategyAnalyzeResult analyze();
 }

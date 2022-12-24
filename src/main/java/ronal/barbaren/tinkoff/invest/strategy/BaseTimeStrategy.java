@@ -1,9 +1,11 @@
-package ronal.barbaren.tinkoff.invest.strategy.base;
+package ronal.barbaren.tinkoff.invest.strategy;
 
 import ronal.barbaren.instant.utils.InstantUtils;
-import ronal.barbaren.tinkoff.invest.strategy.Environment;
+import ronal.barbaren.tinkoff.invest.strategy.analyze.StrategyAnalyzeResult;
+import ronal.barbaren.tinkoff.invest.strategy.env.Environment;
 import ronal.barbaren.tinkoff.invest.wrapper.api.Api;
 
+import javax.annotation.Nullable;
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
 import java.util.Objects;
@@ -13,12 +15,18 @@ public abstract class BaseTimeStrategy extends BaseStrategy {
     private Instant currentDay;
     private Instant currentHour;
     private Instant currentMinute;
+    private Instant currentFiveMinute;
 
     @Override
-    public void run() {
+    @Nullable
+    public StrategyAnalyzeResult analyze() {
         if (isMinuteChanged()) {
             currentMinute = now().truncatedTo(ChronoUnit.MINUTES);
             doEveryMinute();
+        }
+        if (isFiveMinuteChanged()) {
+            currentFiveMinute = now().truncatedTo(ChronoUnit.MINUTES);
+            doEveryFiveMinute();
         }
         if (isHourChanged()) {
             currentHour = now().truncatedTo(ChronoUnit.HOURS);
@@ -32,21 +40,26 @@ public abstract class BaseTimeStrategy extends BaseStrategy {
             currentMonth = InstantUtils.truncateMonth(now());
             doEveryMonth();
         }
+        return null;
     }
 
-    protected boolean isMinuteChanged() {
+    public boolean isFiveMinuteChanged() {
+        return isTimeChanged(currentFiveMinute, ChronoUnit.MINUTES, 5);
+    }
+
+    public boolean isMinuteChanged() {
         return isTimeChanged(currentMinute, ChronoUnit.MINUTES, 1);
     }
 
-    protected boolean isHourChanged() {
+    public boolean isHourChanged() {
         return isTimeChanged(currentHour, ChronoUnit.HOURS, 1);
     }
 
-    protected boolean isDayChanged() {
+    public boolean isDayChanged() {
         return isTimeChanged(currentDay, ChronoUnit.DAYS, 1);
     }
 
-    protected boolean isMonthChanged() {
+    public boolean isMonthChanged() {
         return isMonthChanged(currentMonth, 1);
     }
 
@@ -64,19 +77,22 @@ public abstract class BaseTimeStrategy extends BaseStrategy {
         return !InstantUtils.minusMonth(now, periods).isBefore(time);
     }
 
-    protected void doEveryMinute() {
+    public void doEveryMinute() {
     }
 
-    protected void doEveryHour() {
+    public void doEveryFiveMinute() {
     }
 
-    protected void doEveryDay() {
+    public void doEveryHour() {
     }
 
-    protected void doEveryMonth() {
+    public void doEveryDay() {
     }
 
-    protected Instant now() {
+    public void doEveryMonth() {
+    }
+
+    public Instant now() {
         return getEnv().now();
     }
 

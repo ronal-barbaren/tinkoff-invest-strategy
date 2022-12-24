@@ -1,4 +1,4 @@
-package ronal.barbaren.tinkoff.invest.strategy;
+package ronal.barbaren.tinkoff.invest.strategy.env;
 
 import java.time.Instant;
 
