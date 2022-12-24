@@ -3,11 +3,11 @@
     <modelVersion>4.0.0</modelVersion>
 
     <groupId>ronal.barbaren.tinkoff.invest</groupId>
-    <artifactId>tinkoff-invest-strategy</artifactId>
+    <artifactId>tinkoff-invest-advice</artifactId>
     <version>1.0</version>
     <packaging>jar</packaging>
 
-    <name>tinkoff-invest-strategy</name>
+    <name>tinkoff-invest-advice</name>
 
     <properties>
         <java.version>18</java.version>
