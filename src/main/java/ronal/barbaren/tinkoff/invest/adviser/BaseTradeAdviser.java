@@ -1,54 +1,31 @@
 package ronal.barbaren.tinkoff.invest.adviser;
 
-import ronal.barbaren.tinkoff.invest.adviser.env.Environment;
-import ronal.barbaren.tinkoff.invest.wrapper.api.Api;
-import ronal.barbaren.tinkoff.invest.wrapper.dto.candle.Candle;
-import ronal.barbaren.tinkoff.invest.wrapper.dto.operation.Operation;
+import lombok.Getter;
+import ronal.barbaren.tinkoff.invest.adviser.advice.trade.BaseTradeAdvice;
+import ronal.barbaren.tinkoff.invest.adviser.advice.trade.TradeAdvice;
+import ronal.barbaren.tinkoff.invest.adviser.utils.AdviserUtils;
 
-import javax.annotation.Nullable;
 import java.math.BigDecimal;
-import java.util.Objects;
 
-@Deprecated
-public abstract class BaseTradeAdviser extends BaseCachedAdviser {
+@Getter
+public abstract class BaseTradeAdviser implements TradeAdviser {
+    private final String name;
+    private final TradeAdvice skip;
 
-    private BigDecimal subtractMaxAndMinPriceByLastTradeDayAndCurrentDay;
-
-    @Override
-    public void doEveryMinute() {
-        super.doEveryMinute();
-        subtractMaxAndMinPriceByLastTradeDayAndCurrentDay = null;
+    protected BaseTradeAdviser(String name) {
+        this.name = name;
+        this.skip = new BaseTradeAdvice(name, null);
     }
 
-    @Nullable
-    public BigDecimal getCurrentPriceSubtractLastOperationPrice() {
-        Operation lOperation = getLastExecutedOperation();
-        if (Objects.isNull(lOperation))
-            return null;
-        BigDecimal cPrice = getPosition().getCurrentPrice();
-        BigDecimal oPrice = lOperation.getPrice();
-        return cPrice.subtract(oPrice);
+    protected TradeAdvice buy(BigDecimal price, long lots) {
+        return AdviserUtils.buy(name, price, lots);
     }
 
-    @Nullable
-    public BigDecimal getSubtractMaxAndMinPriceByLastTradeDayAndCurrentDay() {
-        if (Objects.nonNull(subtractMaxAndMinPriceByLastTradeDayAndCurrentDay))
-            return subtractMaxAndMinPriceByLastTradeDayAndCurrentDay;
-        Candle lCandle = getOneDayCandleByLastTradeDay();
-        if (Objects.isNull(lCandle))
-            return null;
-        BigDecimal maxPrice = lCandle.getMaxPrice();
-        BigDecimal minPrice = lCandle.getMinPrice();
-        Candle cCandle = getOneDayCandleByCurrentDay();
-        if (Objects.nonNull(cCandle)) {
-            maxPrice = maxPrice.max(cCandle.getMaxPrice());
-            minPrice = minPrice.min(cCandle.getMinPrice());
-        }
-        subtractMaxAndMinPriceByLastTradeDayAndCurrentDay = maxPrice.subtract(minPrice);
-        return subtractMaxAndMinPriceByLastTradeDayAndCurrentDay;
+    protected TradeAdvice sell(BigDecimal price, long lots) {
+        return AdviserUtils.sell(name, price, lots);
     }
 
-    protected BaseTradeAdviser(Api api, Environment env) {
-        super(api, env);
+    protected TradeAdvice skip() {
+        return skip;
     }
 }

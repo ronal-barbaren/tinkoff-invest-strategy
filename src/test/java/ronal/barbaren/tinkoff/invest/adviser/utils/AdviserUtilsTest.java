@@ -28,7 +28,7 @@ class AdviserUtilsTest extends BaseTest {
                     .minPrice(price)
                     .build());
         }
-        BigDecimal a = StrategyUtils.getAByLinearApproximation(candles);
+        BigDecimal a = MathUtils.getAByLinearApproximation(candles);
         assertNotNull(a);
         a = a.setScale(5, RoundingMode.HALF_EVEN);
         assertTrue(is(a).eq(-0.37576));

@@ -16,7 +16,7 @@ import java.util.Objects;
 import static ronal.barbaren.bigdecimalutils.BigDecimalUtils.is;
 
 @UtilityClass
-public class StrategyUtils {
+public class MathUtils {
 
     @Nullable
     public static BigDecimal sigmoid(BigDecimal x, int scale) {
