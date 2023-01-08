@@ -1,10 +1,11 @@
 package ronal.barbaren.tinkoff.invest.adviser.chain;
 
 import lombok.Getter;
-import ronal.barbaren.tinkoff.invest.adviser.FilterAdviser;
 import ronal.barbaren.tinkoff.invest.adviser.advice.filter.BaseFilterAdvice;
 import ronal.barbaren.tinkoff.invest.adviser.advice.filter.FilterAdvice;
+import ronal.barbaren.tinkoff.invest.adviser.base.filter.FilterAdviser;
 
+import javax.annotation.Nonnull;
 import java.util.Objects;
 
 import static ronal.barbaren.tinkoff.invest.adviser.utils.AdviserUtils.getCompositeName;
@@ -23,13 +24,13 @@ public class AnyFilterChainAdviser implements FilterAdviser {
         this.skip = new BaseFilterAdvice(this.name, false);
     }
 
+    @Nonnull
     @Override
-    public FilterAdvice getAdvice() {
+    public FilterAdvice getFilter() {
         for (FilterAdviser filter : advisers) {
-            FilterAdvice advise = filter.getAdvice();
-            if (!advise.isEnd())
-                continue;
-            return advise;
+            FilterAdvice advise = filter.getFilter();
+            if (advise.isEnd())
+                return advise;
         }
         return skip;
     }

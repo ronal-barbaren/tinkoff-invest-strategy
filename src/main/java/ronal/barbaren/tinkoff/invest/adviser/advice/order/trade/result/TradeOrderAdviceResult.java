@@ -1,9 +1,9 @@
-package ronal.barbaren.tinkoff.invest.adviser.advice.trade.result;
+package ronal.barbaren.tinkoff.invest.adviser.advice.order.trade.result;
 
 import javax.annotation.Nonnull;
 import java.math.BigDecimal;
 
-public interface TradeAdviceResult {
+public interface TradeOrderAdviceResult {
     boolean isBuy();
 
     boolean isSell();

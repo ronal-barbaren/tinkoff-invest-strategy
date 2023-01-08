@@ -1,36 +1,36 @@
-package ronal.barbaren.tinkoff.invest.adviser;
+package ronal.barbaren.tinkoff.invest.adviser.base.order.trade.seq;
 
 import lombok.Getter;
-import ronal.barbaren.tinkoff.invest.adviser.advice.trade.BaseTradeAdvice;
-import ronal.barbaren.tinkoff.invest.adviser.advice.trade.TradeAdvice;
-import ronal.barbaren.tinkoff.invest.adviser.advice.trade.result.TradeAdviceResult;
+import ronal.barbaren.tinkoff.invest.adviser.advice.order.trade.BaseTradeOrderAdvice;
+import ronal.barbaren.tinkoff.invest.adviser.advice.order.trade.TradeOrderAdvice;
+import ronal.barbaren.tinkoff.invest.adviser.advice.order.trade.result.TradeOrderAdviceResult;
 import ronal.barbaren.tinkoff.invest.adviser.utils.AdviserUtils;
 
 import java.math.BigDecimal;
 import java.util.Objects;
 
 @Getter
-public abstract class BaseSeqTradeAdviser implements SeqTradeAdviser {
+public abstract class BaseSeqTradeOrderAdviser implements SeqTradeOrderAdviser {
     private final String name;
-    private final TradeAdvice skip;
+    private final TradeOrderAdvice skip;
 
-    protected BaseSeqTradeAdviser(String name) {
+    protected BaseSeqTradeOrderAdviser(String name) {
         this.name = name;
-        this.skip = new BaseTradeAdvice(name, null);
+        this.skip = new BaseTradeOrderAdvice(name, null);
     }
 
-    protected TradeAdvice buy(BigDecimal price, long lots) {
+    protected TradeOrderAdvice buy(BigDecimal price, long lots) {
         return AdviserUtils.buy(name, price, lots);
     }
 
-    protected TradeAdvice sell(BigDecimal price, long lots) {
+    protected TradeOrderAdvice sell(BigDecimal price, long lots) {
         return AdviserUtils.sell(name, price, lots);
     }
 
-    protected TradeAdvice seq(TradeAdvice advice, BigDecimal price, long lots) {
+    protected TradeOrderAdvice seq(TradeOrderAdvice advice, BigDecimal price, long lots) {
         if (Objects.isNull(advice))
             throw new IllegalArgumentException("previous advice can't be null");
-        TradeAdviceResult result = advice.getResult();
+        TradeOrderAdviceResult result = advice.getResult();
         if (Objects.isNull(result))
             throw new IllegalArgumentException("previous advice result can't be null");
 
@@ -41,13 +41,13 @@ public abstract class BaseSeqTradeAdviser implements SeqTradeAdviser {
         else throw new IllegalArgumentException("invalid previous advice");
     }
 
-    protected TradeAdvice lots(TradeAdvice advice, long lots) {
+    protected TradeOrderAdvice lots(TradeOrderAdvice advice, long lots) {
         if (Objects.isNull(advice))
             throw new IllegalArgumentException("previous advice can't be null");
         return seq(advice, advice.getResult().getPrice(), lots);
     }
 
-    protected TradeAdvice skip() {
+    protected TradeOrderAdvice skip() {
         return skip;
     }
 }

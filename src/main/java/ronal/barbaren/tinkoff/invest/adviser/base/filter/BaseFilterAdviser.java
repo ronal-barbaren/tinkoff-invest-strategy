@@ -1,11 +1,11 @@
-package ronal.barbaren.tinkoff.invest.adviser;
+package ronal.barbaren.tinkoff.invest.adviser.base.filter;
 
 import lombok.Getter;
 import ronal.barbaren.tinkoff.invest.adviser.advice.filter.BaseFilterAdvice;
 import ronal.barbaren.tinkoff.invest.adviser.advice.filter.FilterAdvice;
 
-@Getter
 public abstract class BaseFilterAdviser implements FilterAdviser {
+    @Getter
     private final String name;
     private final FilterAdvice end;
     private final FilterAdvice next;
